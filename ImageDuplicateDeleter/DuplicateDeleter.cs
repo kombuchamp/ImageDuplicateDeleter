@@ -41,7 +41,7 @@ namespace ImageDuplicateDeleter
                                 Console.WriteLine($"Found duplicate: {imagePaths[i]}");
 
                                 filesToDelete.Add(imagePaths[i]);
-                                imagePaths.Remove(imagePaths[i]);
+                                imagePaths.Remove(imagePaths[i]); i--; // Step backwards because we removed element
                             }
                         }
 

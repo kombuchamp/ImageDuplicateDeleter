@@ -22,7 +22,7 @@ namespace ImageDuplicateDeleter
 
             try
             {
-                deleter.Delete();
+                deleter.DeleteFiles( deleter.FindDuplicates() );
             }
             catch (Exception e)
             {

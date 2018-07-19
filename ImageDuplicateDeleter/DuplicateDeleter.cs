@@ -11,27 +11,33 @@ namespace ImageDuplicateDeleter
 {
     public class DuplicateDeleter
     {
-        public List<string> imagePaths; // public for tests!
+        public List<string> imagePaths = new List<string>(); // public for tests!
+
         private readonly ImageConverter imageConverter = new ImageConverter();
-        //private readonly SHA256Managed hasher = new SHA256Managed(); // Hashing algorithm has bugs atm
+        private readonly MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
 
         public DuplicateDeleter()
         {
-            this.imagePaths = Directory.GetFiles(@".\", @"*.jpg").ToList(); // TODO: add options here
+            // Adding all kinds of images to the list (consider adding user options?)
+            this.imagePaths.AddRange(Directory.GetFiles(@".\", @"*.jpg").ToList());
+            this.imagePaths.AddRange(Directory.GetFiles(@".\", @"*.jpeg").ToList());
+            this.imagePaths.AddRange(Directory.GetFiles(@".\", @"*.png").ToList());
+            this.imagePaths.AddRange(Directory.GetFiles(@".\", @"*.bmp").ToList());
+            this.imagePaths.AddRange(Directory.GetFiles(@".\", @"*.gif").ToList());
         }
 
-        public void Delete()
+        public IEnumerable<string> FindDuplicates()
         {
             Image pic1;
             Image pic2;
 
-            List<string> filesToDelete = new List<string>();
+            var imagePaths = this.imagePaths; // Local scope copy of this field. (Consider choosing more proper name?)
+            var filesToDelete = new List<string>();
 
             while (imagePaths.Count != 0)
             {
                 using (pic1 = Image.FromFile(imagePaths[0]))
                 {
-
                     for (int i = 1; i < imagePaths.Count; i++)
                     {
                         using (pic2 = Image.FromFile(imagePaths[i]))
@@ -48,13 +54,15 @@ namespace ImageDuplicateDeleter
                     }
 
                     imagePaths.RemoveAt(0); // file at this index is already checked
-
-                    pic1.Dispose();
                 }
             };
 
+            //DeleteFiles(filesToDelete);
+            return filesToDelete;
+        }
 
-
+        public void DeleteFiles(IEnumerable<string> filesToDelete)
+        {
             //Deletion routine
             foreach (var item in filesToDelete)
             {
@@ -67,6 +75,8 @@ namespace ImageDuplicateDeleter
                     throw;
                 }
             }
+            // Remove deleted files from file list
+            this.imagePaths.Except(filesToDelete);
         }
 
         // Compares two images and returns true if they are equal
@@ -76,16 +86,15 @@ namespace ImageDuplicateDeleter
                 return false;
 
             // Convert images to byte arrays
-            byte[] rawPic1 = (byte[])imageConverter.ConvertTo(pic1, typeof(byte[]));
-            byte[] rawPic2 = (byte[])imageConverter.ConvertTo(pic2, typeof(byte[]));
-
-            // TODO: This method of comparation won't work in some cases. Consider if its needed at all
+            byte[] rawPic1 = imageConverter.ConvertTo(pic1, typeof(byte[])) as byte[];
+            byte[] rawPic2 = imageConverter.ConvertTo(pic2, typeof(byte[])) as byte[];
 
             // Generate hash for each image
-            //var hash1 = hasher.ComputeHash(rawPic1);
-            //var hash2 = hasher.ComputeHash(rawPic1);
+            var hash1 = md5.ComputeHash(rawPic1);
+            var hash2 = md5.ComputeHash(rawPic2);
 
-            return rawPic1.SequenceEqual(rawPic2);
+
+            return hash1.SequenceEqual(hash2);
         }
     }
 }

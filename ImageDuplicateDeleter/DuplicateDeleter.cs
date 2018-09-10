@@ -11,19 +11,20 @@ namespace ImageDuplicateDeleter
 {
     public class DuplicateDeleter
     {
-        public List<string> imagePaths = new List<string>(); // public for tests!
-
+        private readonly List<string> imagePaths = new List<string>();
         private readonly ImageConverter imageConverter = new ImageConverter();
         private readonly MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
 
+        public string Path { get; set; } = @".\";
+
         public DuplicateDeleter()
         {
-            // Adding all kinds of images to the list (consider adding user options?)
-            this.imagePaths.AddRange(Directory.GetFiles(@".\", @"*.jpg").ToList());
-            this.imagePaths.AddRange(Directory.GetFiles(@".\", @"*.jpeg").ToList());
-            this.imagePaths.AddRange(Directory.GetFiles(@".\", @"*.png").ToList());
-            this.imagePaths.AddRange(Directory.GetFiles(@".\", @"*.bmp").ToList());
-            this.imagePaths.AddRange(Directory.GetFiles(@".\", @"*.gif").ToList());
+            // Adding all kinds of images to the list
+            this.imagePaths.AddRange(Directory.GetFiles(Path, @"*.jpg").ToList());
+            this.imagePaths.AddRange(Directory.GetFiles(Path, @"*.jpeg").ToList());
+            this.imagePaths.AddRange(Directory.GetFiles(Path, @"*.png").ToList());
+            this.imagePaths.AddRange(Directory.GetFiles(Path, @"*.bmp").ToList());
+            this.imagePaths.AddRange(Directory.GetFiles(Path, @"*.gif").ToList());
         }
 
         public IEnumerable<string> FindDuplicates()
@@ -31,7 +32,7 @@ namespace ImageDuplicateDeleter
             Image pic1;
             Image pic2;
 
-            var imagePaths = this.imagePaths; // Local scope copy of this field. (Consider choosing more proper name?)
+            var imagePaths = this.imagePaths; // Local scope copy of this field.
             var filesToDelete = new List<string>();
 
             while (imagePaths.Count != 0)
@@ -44,10 +45,8 @@ namespace ImageDuplicateDeleter
                         {
                             if (IsDuplicateImage(pic1, pic2))
                             {
-                                Console.WriteLine($"Found duplicate: {imagePaths[i]}");
-
                                 filesToDelete.Add(imagePaths[i]);
-                                imagePaths.Remove(imagePaths[i]); i--; // Step backwards because we removed element
+                                imagePaths.Remove(imagePaths[i]); i--; // Step backwards because we removed an element
                             }
                         }
 
@@ -93,7 +92,7 @@ namespace ImageDuplicateDeleter
             var hash1 = md5.ComputeHash(rawPic1);
             var hash2 = md5.ComputeHash(rawPic2);
 
-
+            // Compare hashes of images
             return hash1.SequenceEqual(hash2);
         }
     }

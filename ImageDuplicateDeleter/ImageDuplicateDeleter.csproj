@@ -44,11 +44,22 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DuplicateDeleter.cs" />
+    <Compile Include="res\Help.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Help.resx</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="res\Help.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Help.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
